@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/QuickAdapterSample.iml" filepath="$PROJECT_DIR$/QuickAdapterSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/quickadapter/quickadapter.iml" filepath="$PROJECT_DIR$/quickadapter/quickadapter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/quickviewholder/quickviewholder.iml" filepath="$PROJECT_DIR$/quickviewholder/quickviewholder.iml" />
     </modules>
   </component>
 </project>
