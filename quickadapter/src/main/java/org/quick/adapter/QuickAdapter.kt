@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import org.quick.viewHolder.OnClickListener2
-import org.quick.viewHolder.QuickVH
-import org.quick.viewHolder.QuickVHService
+import org.quick.viewHolder.VHService
+import org.quick.viewHolder.ViewHolder
 
 /**
  * Created by chris Zou on 2016/6/12.
@@ -390,22 +390,22 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         if (parent?.layoutManager is StaggeredGridLayoutManager && (isHeaderView(holder.itemView) || isFooterView(holder.itemView))) (holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
     }
 
-    open class ViewHolder(itemView: View, private var vh: QuickVH = QuickVH(itemView)) : RecyclerView.ViewHolder(itemView), QuickVHService {
+    open class ViewHolder(itemView: View, private var vh: org.quick.viewHolder.ViewHolder = org.quick.viewHolder.ViewHolder(itemView)) : RecyclerView.ViewHolder(itemView), VHService {
         override fun <T : View> getView(id: Int): T? = vh.getView<T>(id)
 
-        override fun setText(id: Int, content: CharSequence?, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setText(id, content, onClickListener)
+        override fun setText(id: Int, content: CharSequence?, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setText(id, content, onClickListener)
 
-        override fun setImg(id: Int, iconId: Int, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImg(id, iconId, onClickListener)
+        override fun setImg(id: Int, iconId: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImg(id, iconId, onClickListener)
 
-        override fun setImg(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImg(id, url, onClickListener)
+        override fun setImg(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImg(id, url, onClickListener)
 
-        override fun setImgRoundRect(id: Int, radius: Float, iconId: Int, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImgRoundRect(id, radius, iconId, onClickListener)
+        override fun setImgRoundRect(id: Int, radius: Float, iconId: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgRoundRect(id, radius, iconId, onClickListener)
 
-        override fun setImgRoundRect(id: Int, radius: Float, url: CharSequence, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImgRoundRect(id, radius, url, onClickListener)
+        override fun setImgRoundRect(id: Int, radius: Float, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgRoundRect(id, radius, url, onClickListener)
 
-        override fun setImgCircle(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImgCircle(id, url, onClickListener)
+        override fun setImgCircle(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgCircle(id, url, onClickListener)
 
-        override fun setImgCircle(id: Int, imgRes: Int, onClickListener: ((view: View, vhService: QuickVHService) -> Unit)?): QuickVHService = vh.setImgCircle(id, imgRes, onClickListener)
+        override fun setImgCircle(id: Int, imgRes: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgCircle(id, imgRes, onClickListener)
 
         override fun bindImgCircle(context: Context, url: String, imageView: ImageView?): ViewHolder =this
 
@@ -413,21 +413,21 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
         override fun bindImgRoundRect(context: Context, url: String, radius: Float, imageView: ImageView?): ViewHolder =this
 
-        override fun setOnClickListener(onClickListener: (view: View, vhService: QuickVHService) -> Unit, vararg ids: Int): QuickVHService = vh.setOnClickListener(onClickListener,*ids)
+        override fun setOnClickListener(onClickListener: (view: View, vhService: VHService) -> Unit, vararg ids: Int): VHService = vh.setOnClickListener(onClickListener,*ids)
 
-        override fun setOnClickListener(onClickListener: (view: View, vhService: QuickVHService) -> Unit, id: Int): QuickVHService = vh.setOnClickListener(onClickListener, id)
+        override fun setOnClickListener(onClickListener: (view: View, vhService: VHService) -> Unit, id: Int): VHService = vh.setOnClickListener(onClickListener, id)
 
-        override fun setProgress(id: Int, value: Int): QuickVHService = vh.setProgress(id, value)
+        override fun setProgress(id: Int, value: Int): VHService = vh.setProgress(id, value)
 
-        override fun setCheck(id: Int, isChecked: Boolean): QuickVHService = vh.setCheck(id, isChecked)
+        override fun setCheck(id: Int, isChecked: Boolean): VHService = vh.setCheck(id, isChecked)
 
-        override fun setBackgroundResource(id: Int, bgResId: Int): QuickVHService = vh.setBackgroundResource(id, bgResId)
+        override fun setBackgroundResource(id: Int, bgResId: Int): VHService = vh.setBackgroundResource(id, bgResId)
 
-        override fun setBackground(id: Int, background: Drawable): QuickVHService = vh.setBackground(id, background)
+        override fun setBackground(id: Int, background: Drawable): VHService = vh.setBackground(id, background)
 
-        override fun setBackgroundColor(id: Int, background: Int): QuickVHService = vh.setBackgroundColor(id, background)
+        override fun setBackgroundColor(id: Int, background: Int): VHService = vh.setBackgroundColor(id, background)
 
-        override fun setVisibility(visibility: Int, vararg resIds: Int): QuickVHService = vh.setVisibility(visibility, *resIds)
+        override fun setVisibility(visibility: Int, vararg resIds: Int): VHService = vh.setVisibility(visibility, *resIds)
 
         override fun getTextView(id: Int): TextView? = vh.getTextView(id)
 
