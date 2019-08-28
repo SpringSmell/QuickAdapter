@@ -390,6 +390,15 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         if (parent?.layoutManager is StaggeredGridLayoutManager && (isHeaderView(holder.itemView) || isFooterView(holder.itemView))) (holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
     }
 
+    /**
+     * 是否垂直滚动
+     */
+    fun isVertically(): Boolean {
+        return if (parent != null) {
+            parent!!.layoutManager!!.canScrollVertically()
+        } else true
+    }
+
     open class ViewHolder(itemView: View, private var vh: org.quick.viewHolder.ViewHolder = org.quick.viewHolder.ViewHolder(itemView)) : RecyclerView.ViewHolder(itemView), VHService {
         override fun <T : View> getView(id: Int): T? = vh.getView<T>(id)
 
