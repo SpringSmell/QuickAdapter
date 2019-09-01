@@ -15,8 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import org.quick.viewHolder.OnClickListener2
 import org.quick.viewHolder.VHService
+import org.quick.viewHolder.callback.OnClickListener2
 
 /**
  * Created by chris Zou on 2016/6/12.
@@ -34,10 +34,13 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     val mHeaderViews = SparseArray<View>()/*头部*/
     val mFooterViews = SparseArray<View>()/*底部*/
 
-    var mOnItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? = null
-    var mOnItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)? = null
+    var mOnItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? =
+        null
+    var mOnItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)? =
+        null
     var mOnClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? = null
-    var mOnCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit)? = null
+    var mOnCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit)? =
+        null
     var clickResId: IntArray = intArrayOf()
     var checkedChangedResId = intArrayOf()
 
@@ -74,7 +77,9 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @return
      */
     open fun onResultMarginTop(position: Int): Float {
-        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(position)
+        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(
+            position
+        )
     }
 
     /**
@@ -83,7 +88,9 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @return
      */
     open fun onResultMarginBottom(position: Int): Float {
-        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(position)
+        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(
+            position
+        )
     }
 
     /**
@@ -114,7 +121,9 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @return
      */
     open fun onResultPaddingTop(position: Int): Float {
-        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(position)
+        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(
+            position
+        )
     }
 
     /**
@@ -123,7 +132,9 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @return
      */
     open fun onResultPaddingBottom(position: Int): Float {
-        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(position)
+        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(
+            position
+        )
     }
 
     /**
@@ -149,16 +160,33 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         return when {
             mHeaderViews.get(viewType) != null -> ViewHolder(mHeaderViews.get(viewType)) as H
             mFooterViews.get(viewType) != null -> ViewHolder(mFooterViews.get(viewType)) as H
-            else -> setupLayout(LayoutInflater.from(context).inflate(onResultLayoutResId(viewType), parent, false))
+            else -> setupLayout(
+                LayoutInflater.from(context).inflate(
+                    onResultLayoutResId(viewType),
+                    parent,
+                    false
+                )
+            )
         }
     }
 
     open fun setupLayout(itemView: View): H {
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (itemView.foreground == null)
-                itemView.foreground = ContextCompat.getDrawable(context, Utils.getSystemAttrTypeValue(context, R.attr.selectableItemBackgroundBorderless).resourceId)
-        }else if (itemView.background == null)
-            itemView.setBackgroundResource(Utils.getSystemAttrTypeValue(context, R.attr.selectableItemBackground).resourceId)
+                itemView.foreground = ContextCompat.getDrawable(
+                    context,
+                    Utils.getSystemAttrTypeValue(
+                        context,
+                        R.attr.selectableItemBackgroundBorderless
+                    ).resourceId
+                )
+        } else if (itemView.background == null)
+            itemView.setBackgroundResource(
+                Utils.getSystemAttrTypeValue(
+                    context,
+                    R.attr.selectableItemBackground
+                ).resourceId
+            )
 
         return onResultViewHolder(itemView)
     }
@@ -174,7 +202,12 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
             val realPosition = getOriginalPosition(position)
             setupListener(holder)
             setupLayout(holder, realPosition)
-            onBindData(holder, realPosition, dataList()[realPosition], getItemViewType(realPosition))
+            onBindData(
+                holder,
+                realPosition,
+                dataList()[realPosition],
+                getItemViewType(realPosition)
+            )
         }
     }
 
@@ -187,7 +220,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         /*单击事件*/
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(object : OnClickListener2() {
-                override fun onClick2(view: View) {
+                override fun click(view: View) {
                     val dataIndex = getOriginalPosition(holder.adapterPosition)
                     mOnItemClickListener?.invoke(view, holder, dataIndex, getItem(dataIndex))
                 }
@@ -205,15 +238,28 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
                 if (compoundButton is CompoundButton)
                     compoundButton.setOnCheckedChangeListener { buttonView, isChecked ->
                         val dataIndex = getOriginalPosition(holder.adapterPosition)
-                        mOnCheckedChangedListener?.invoke(buttonView, holder, isChecked, dataIndex, getItem(dataIndex))
+                        mOnCheckedChangedListener?.invoke(
+                            buttonView,
+                            holder,
+                            isChecked,
+                            dataIndex,
+                            getItem(dataIndex)
+                        )
                     }
                 else
-                    Log.e("列表选择事件错误：", String.format("from%s id:%d类型不正确，无法设置OnCheckedChangedListener", context.javaClass.simpleName, resId))
+                    Log.e(
+                        "列表选择事件错误：",
+                        String.format(
+                            "from%s id:%d类型不正确，无法设置OnCheckedChangedListener",
+                            context.javaClass.simpleName,
+                            resId
+                        )
+                    )
             }
         }
         /*item项内View的独立点击事件，与OnItemClickListner不冲突*/
         if (mOnClickListener != null && clickResId.isNotEmpty()) {
-            holder.setOnClickListener({ view, viewHolder ->
+            holder.setOnClick({ view, vh ->
                 val dataIndex = getOriginalPosition(holder.adapterPosition)
                 mOnClickListener?.invoke(view, holder, dataIndex, getItem(dataIndex))
             }, *clickResId)
@@ -251,12 +297,10 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     fun dataList(dataList: MutableList<M>) {
-        if (dataList.isNotEmpty()) {
-            notifyItemRangeRemoved(0, dataList().size)
-            dataList().clear()
-            dataList().addAll(dataList)
-            notifyItemRangeInserted(0, dataList().size)
-        }
+        notifyItemRangeRemoved(0, dataList().size)
+        dataList().clear()
+        dataList().addAll(dataList)
+        notifyItemRangeInserted(0, dataList().size)
     }
 
     fun dataList(): MutableList<M> {
@@ -295,12 +339,20 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         return dataList()[position]
     }
 
-    fun onClick(onClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg params: Int) {
+    fun onClick(
+        onClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit), @Size(
+            min = 1
+        ) vararg params: Int
+    ) {
         this.clickResId = params
         this.mOnClickListener = onClickListener
     }
 
-    fun onCheckedChanged(onCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg checkedChangedResId: Int) {
+    fun onCheckedChanged(
+        onCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit), @Size(
+            min = 1
+        ) vararg checkedChangedResId: Int
+    ) {
         this.checkedChangedResId = checkedChangedResId
         this.mOnCheckedChangedListener = onCheckedChangedListener
     }
@@ -360,13 +412,17 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * 根据flag判断是否是头部
      * * @param flag 下标位置或者是Key
      */
-    fun isHeaderView(flag: Int): Boolean = itemCount > dataList.size && flag - mHeaderViews.size() < 0 || mHeaderViews.get(flag) != null
+    fun isHeaderView(flag: Int): Boolean =
+        itemCount > dataList.size && flag - mHeaderViews.size() < 0 || mHeaderViews.get(flag) != null
 
     /**
      * 根据flag判断是否是尾总
      * @param flag 下标位置或者是Key
      */
-    fun isFooterView(flag: Int): Boolean = itemCount > dataList.size && flag - mHeaderViews.size() >= dataList.size || mFooterViews.get(flag) != null
+    fun isFooterView(flag: Int): Boolean =
+        itemCount > dataList.size && flag - mHeaderViews.size() >= dataList.size || mFooterViews.get(
+            flag
+        ) != null
 
     fun isHeaderView(view: View) = mHeaderViews.size() > 0 && mHeaderViews.indexOfValue(view) != -1
 
@@ -376,17 +432,22 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         super.onAttachedToRecyclerView(recyclerView)
         parent = recyclerView
         when {
-            parent!!.layoutManager is GridLayoutManager -> (parent!!.layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return if (isHeaderView(position) || isFooterView(position)) (parent!!.layoutManager as GridLayoutManager).spanCount else 1
+            parent!!.layoutManager is GridLayoutManager -> (parent!!.layoutManager as GridLayoutManager).spanSizeLookup =
+                object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        return if (isHeaderView(position) || isFooterView(position)) (parent!!.layoutManager as GridLayoutManager).spanCount else 1
+                    }
                 }
-            }
         }
     }
 
     override fun onViewAttachedToWindow(holder: H) {
         super.onViewAttachedToWindow(holder)
-        if (parent?.layoutManager is StaggeredGridLayoutManager && (isHeaderView(holder.itemView) || isFooterView(holder.itemView))) (holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
+        if (parent?.layoutManager is StaggeredGridLayoutManager && (isHeaderView(holder.itemView) || isFooterView(
+                holder.itemView
+            ))
+        ) (holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan =
+            true
     }
 
     /**
@@ -398,44 +459,94 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         } else true
     }
 
-    open class ViewHolder(itemView: View, private var vh: org.quick.viewHolder.ViewHolder = org.quick.viewHolder.ViewHolder(itemView)) : RecyclerView.ViewHolder(itemView), VHService {
+    open class ViewHolder(
+        itemView: View,
+        private var vh: org.quick.viewHolder.ViewHolder = org.quick.viewHolder.ViewHolder(
+            itemView
+        )
+    ) : RecyclerView.ViewHolder(itemView), VHService {
         override fun <T : View> getView(id: Int): T? = vh.getView<T>(id)
 
-        override fun setText(id: Int, content: CharSequence?, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setText(id, content, onClickListener)
+        override fun setText(
+            id: Int,
+            content: CharSequence?,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setText(id, content, onClickListener)
 
-        override fun setImg(id: Int, iconId: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImg(id, iconId, onClickListener)
+        override fun setImg(
+            id: Int,
+            iconId: Int,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImg(id, iconId, onClickListener)
 
-        override fun setImg(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImg(id, url, onClickListener)
+        override fun setImg(
+            id: Int,
+            url: CharSequence,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImg(id, url, onClickListener)
 
-        override fun setImgRoundRect(id: Int, radius: Float, iconId: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgRoundRect(id, radius, iconId, onClickListener)
+        override fun setImgRoundRect(
+            id: Int,
+            radius: Float,
+            iconId: Int,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImgRoundRect(id, radius, iconId, onClickListener)
 
-        override fun setImgRoundRect(id: Int, radius: Float, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgRoundRect(id, radius, url, onClickListener)
+        override fun setImgRoundRect(
+            id: Int,
+            radius: Float,
+            url: CharSequence,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImgRoundRect(id, radius, url, onClickListener)
 
-        override fun setImgCircle(id: Int, url: CharSequence, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgCircle(id, url, onClickListener)
+        override fun setImgCircle(
+            id: Int,
+            url: CharSequence,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImgCircle(id, url, onClickListener)
 
-        override fun setImgCircle(id: Int, imgRes: Int, onClickListener: ((view: View, vhService: VHService) -> Unit)?): VHService = vh.setImgCircle(id, imgRes, onClickListener)
+        override fun setImgCircle(
+            id: Int,
+            imgRes: Int,
+            onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
+        ): VHService = vh.setImgCircle(id, imgRes, onClickListener)
 
-        override fun bindImgCircle(context: Context, url: String, imageView: ImageView?): ViewHolder =this
+        override fun bindImgCircle(
+            context: Context,
+            url: String,
+            imageView: ImageView?
+        ): ViewHolder = this
 
-        override fun bindImg(context: Context, url: String, imageView: ImageView?): ViewHolder =this
+        override fun bindImg(context: Context, url: String, imageView: ImageView?): ViewHolder =
+            this
 
-        override fun bindImgRoundRect(context: Context, url: String, radius: Float, imageView: ImageView?): ViewHolder =this
+        override fun bindImgRoundRect(
+            context: Context,
+            url: String,
+            radius: Float,
+            imageView: ImageView?
+        ): ViewHolder = this
 
-        override fun setOnClickListener(onClickListener: (view: View, vhService: VHService) -> Unit, vararg ids: Int): VHService = vh.setOnClickListener(onClickListener,*ids)
-
-        override fun setOnClickListener(onClickListener: (view: View, vhService: VHService) -> Unit, id: Int): VHService = vh.setOnClickListener(onClickListener, id)
+        override fun setOnClick(
+            onClickListener: (view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit,
+            vararg ids: Int
+        ): VHService = vh.setOnClick(onClickListener, *ids)
 
         override fun setProgress(id: Int, value: Int): VHService = vh.setProgress(id, value)
 
         override fun setCheck(id: Int, isChecked: Boolean): VHService = vh.setCheck(id, isChecked)
 
-        override fun setBackgroundResource(id: Int, bgResId: Int): VHService = vh.setBackgroundResource(id, bgResId)
+        override fun setBackgroundResource(id: Int, bgResId: Int): VHService =
+            vh.setBackgroundResource(id, bgResId)
 
-        override fun setBackground(id: Int, background: Drawable): VHService = vh.setBackground(id, background)
+        override fun setBackground(id: Int, background: Drawable): VHService =
+            vh.setBackground(id, background)
 
-        override fun setBackgroundColor(id: Int, background: Int): VHService = vh.setBackgroundColor(id, background)
+        override fun setBackgroundColor(id: Int, background: Int): VHService =
+            vh.setBackgroundColor(id, background)
 
-        override fun setVisibility(visibility: Int, vararg resIds: Int): VHService = vh.setVisibility(visibility, *resIds)
+        override fun setVisibility(visibility: Int, vararg resIds: Int): VHService =
+            vh.setVisibility(visibility, *resIds)
 
         override fun getTextView(id: Int): TextView? = vh.getTextView(id)
 
