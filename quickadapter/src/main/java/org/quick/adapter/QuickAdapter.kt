@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import org.quick.viewHolder.OnClickListener2
 import org.quick.viewHolder.VHService
-import org.quick.viewHolder.ViewHolder
 
 /**
  * Created by chris Zou on 2016/6/12.
@@ -65,7 +64,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemMargin(position: Int): Float {
+    open fun onResultMargin(position: Int): Float {
         return 0.0f
     }
 
@@ -74,8 +73,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemMarginTop(position: Int): Float {
-        return if (onResultItemMargin(position) > 0) onResultItemMargin(position) / 2 else onResultItemMargin(position)
+    open fun onResultMarginTop(position: Int): Float {
+        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(position)
     }
 
     /**
@@ -83,8 +82,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemMarginBottom(position: Int): Float {
-        return if (onResultItemMargin(position) > 0) onResultItemMargin(position) / 2 else onResultItemMargin(position)
+    open fun onResultMarginBottom(position: Int): Float {
+        return if (onResultMargin(position) > 0) onResultMargin(position) / 2 else onResultMargin(position)
     }
 
     /**
@@ -92,8 +91,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemMarginLeft(position: Int): Float {
-        return onResultItemMargin(position)
+    open fun onResultMarginLeft(position: Int): Float {
+        return onResultMargin(position)
     }
 
     /**
@@ -101,11 +100,11 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemMarginRight(position: Int): Float {
-        return onResultItemMargin(position)
+    open fun onResultMarginRight(position: Int): Float {
+        return onResultMargin(position)
     }
 
-    open fun onResultItemPadding(position: Int): Float {
+    open fun onResultPadding(position: Int): Float {
         return 0.0f
     }
 
@@ -114,8 +113,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemPaddingTop(position: Int): Float {
-        return if (onResultItemPadding(position) > 0) onResultItemPadding(position) / 2 else onResultItemPadding(position)
+    open fun onResultPaddingTop(position: Int): Float {
+        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(position)
     }
 
     /**
@@ -123,8 +122,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemPaddingBottom(position: Int): Float {
-        return if (onResultItemPadding(position) > 0) onResultItemPadding(position) / 2 else onResultItemPadding(position)
+    open fun onResultPaddingBottom(position: Int): Float {
+        return if (onResultPadding(position) > 0) onResultPadding(position) / 2 else onResultPadding(position)
     }
 
     /**
@@ -132,8 +131,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemPaddingLeft(position: Int): Float {
-        return onResultItemPadding(position)
+    open fun onResultPaddingLeft(position: Int): Float {
+        return onResultPadding(position)
     }
 
     /**
@@ -141,8 +140,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      *
      * @return
      */
-    open fun onResultItemPaddingRight(position: Int): Float {
-        return onResultItemPadding(position)
+    open fun onResultPaddingRight(position: Int): Float {
+        return onResultPadding(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): H {
@@ -175,7 +174,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
             val realPosition = getOriginalPosition(position)
             setupListener(holder)
             setupLayout(holder, realPosition)
-            onBindData(holder, realPosition, getDataList()[realPosition], getItemViewType(realPosition))
+            onBindData(holder, realPosition, dataList()[realPosition], getItemViewType(realPosition))
         }
     }
 
@@ -228,89 +227,89 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @param position
      */
     private fun setupLayout(holder: H, position: Int) {
-        if (onResultItemMargin(position) > 0) {
-            val left = onResultItemMarginLeft(position).toInt()
-            val top = onResultItemMarginTop(position).toInt()
-            val right = onResultItemMarginRight(position).toInt()
-            var bottom = onResultItemMarginBottom(position).toInt() / 2
+        if (onResultMargin(position) > 0) {
+            val left = onResultMarginLeft(position).toInt()
+            val top = onResultMarginTop(position).toInt()
+            val right = onResultMarginRight(position).toInt()
+            var bottom = onResultMarginBottom(position).toInt() / 2
 
             if (position == itemCount - 1)
-                bottom = onResultItemMarginBottom(position).toInt()
+                bottom = onResultMarginBottom(position).toInt()
             val itemLayoutParams = holder.itemView.layoutParams as RecyclerView.LayoutParams
             itemLayoutParams.setMargins(left, top, right, bottom)
         }
-        if (onResultItemPadding(position) > 0) {
-            val left = onResultItemPaddingLeft(position).toInt()
-            val top = onResultItemPaddingTop(position).toInt()
-            val right = onResultItemPaddingRight(position).toInt()
-            var bottom = onResultItemPaddingBottom(position).toInt() / 2
+        if (onResultPadding(position) > 0) {
+            val left = onResultPaddingLeft(position).toInt()
+            val top = onResultPaddingTop(position).toInt()
+            val right = onResultPaddingRight(position).toInt()
+            var bottom = onResultPaddingBottom(position).toInt() / 2
 
             if (position == itemCount - 1)
-                bottom = onResultItemPaddingBottom(position).toInt()
+                bottom = onResultPaddingBottom(position).toInt()
             holder.itemView.setPadding(left, top, right, bottom)
         }
     }
 
-    fun setDataList(dataList: MutableList<M>) {
+    fun dataList(dataList: MutableList<M>) {
         if (dataList.isNotEmpty()) {
-            notifyItemRangeRemoved(0, getDataList().size)
-            getDataList().clear()
-            getDataList().addAll(dataList)
-            notifyItemRangeInserted(0, getDataList().size)
+            notifyItemRangeRemoved(0, dataList().size)
+            dataList().clear()
+            dataList().addAll(dataList)
+            notifyItemRangeInserted(0, dataList().size)
         }
     }
 
-    fun getDataList(): MutableList<M> {
+    fun dataList(): MutableList<M> {
         return dataList
     }
 
-    fun addDataList(dataList: MutableList<M>) {
+    fun add(dataList: MutableList<M>) {
         if (dataList.isNotEmpty()) {
-            val lastSize = getDataList().size
-            getDataList().addAll(dataList)
-            notifyItemRangeInserted(lastSize, getDataList().size)
+            val lastSize = dataList().size
+            dataList().addAll(dataList)
+            notifyItemRangeInserted(lastSize, dataList().size)
         }
     }
 
+    fun add(m: M) {
+        dataList().add(m)
+        notifyItemInserted(dataList().size)
+    }
+
     open fun remove(position: Int) {
-        getDataList().removeAt(position)
+        dataList().removeAt(position)
         notifyItemRemoved(position + mHeaderViews.size())
     }
 
     open fun remove(m: M) {
-        getDataList().remove(m)
-        notifyItemRemoved(getDataList().indexOf(m) + mHeaderViews.size())
+        dataList().remove(m)
+        notifyItemRemoved(dataList().indexOf(m) + mHeaderViews.size())
     }
 
     fun removeAll() {
-        notifyItemRangeRemoved(mHeaderViews.size(), getDataList().size)
-        getDataList().clear()
-    }
-
-    fun add(m: M) {
-        getDataList().add(m)
-        notifyItemInserted(getDataList().size)
+        notifyItemRangeRemoved(mHeaderViews.size(), dataList().size)
+        dataList().clear()
     }
 
     fun getItem(position: Int): M {
-        return getDataList()[position]
+        return dataList()[position]
     }
 
-    fun setOnClickListener(onClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg params: Int) {
+    fun onClick(onClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg params: Int) {
         this.clickResId = params
         this.mOnClickListener = onClickListener
     }
 
-    fun setOnCheckedChangedListener(onCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg checkedChangedResId: Int) {
+    fun onCheckedChanged(onCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit), @Size(min = 1) vararg checkedChangedResId: Int) {
         this.checkedChangedResId = checkedChangedResId
         this.mOnCheckedChangedListener = onCheckedChangedListener
     }
 
-    fun setOnItemClickListener(onItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)) {
+    fun onItemClick(onItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)) {
         this.mOnItemClickListener = onItemClickListener
     }
 
-    fun setOnItemLongClickListener(onItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)) {
+    fun onItemLongClick(onItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)) {
         this.mOnItemLongClickListener = onItemLongClickListener
     }
 
@@ -319,7 +318,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     /**
      * 添加头部View
      */
-    fun addHeaderView(@Size(min = 1) vararg views: View) {
+    fun addHeader(@Size(min = 1) vararg views: View) {
         for (view in views) {
             mHeaderViews.put(mHeaderViews.size() + Int.MAX_VALUE / 100, view)
         }
@@ -329,14 +328,14 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     /**
      * 添加底部View
      */
-    fun addFooterView(@Size(min = 1) vararg views: View) {
+    fun addFooter(@Size(min = 1) vararg views: View) {
         for (view in views) {
             mFooterViews.put(mFooterViews.size() + Int.MAX_VALUE / 100, view)
         }
         notifyItemRangeInserted(itemCount - views.size, itemCount)
     }
 
-    fun removeHeaderView(view: View) {
+    fun removeHeader(view: View) {
         val index = mHeaderViews.indexOfValue(view)
         if (index != -1) {
             mHeaderViews.remove(mHeaderViews.keyAt(index))
@@ -344,11 +343,11 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         }
     }
 
-    fun removeFooterView(view: View) {
+    fun removeFooter(view: View) {
         val index = mFooterViews.indexOfValue(view)
         if (index != -1) {
             mFooterViews.remove(mFooterViews.keyAt(index))
-            notifyItemRemoved(index + mHeaderViews.size() + getDataList().size)
+            notifyItemRemoved(index + mHeaderViews.size() + dataList().size)
         }
     }
 
