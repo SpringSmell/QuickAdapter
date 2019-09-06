@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Android-QuickAdapter.iml" filepath="$PROJECT_DIR$/Android-QuickAdapter.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/QuickAdapter.iml" filepath="$PROJECT_DIR$/.idea/QuickAdapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/QuickAdapter-app.iml" filepath="$PROJECT_DIR$/app/QuickAdapter-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/quickadapter/QuickAdapter-quickadapter.iml" filepath="$PROJECT_DIR$/quickadapter/QuickAdapter-quickadapter.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/quickadapter/quickadapter.iml" filepath="$PROJECT_DIR$/quickadapter/quickadapter.iml" />
     </modules>

@@ -9,4 +9,8 @@
             android:layout_height="100dp"
             android:gravity="center"
             android:text="测试"/>
+    <ImageView
+            android:id="@+id/coverIv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 </LinearLayout>

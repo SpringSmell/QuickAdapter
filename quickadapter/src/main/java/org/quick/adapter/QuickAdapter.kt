@@ -459,94 +459,140 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         } else true
     }
 
+
+    @Suppress("LeakingThis")
     open class ViewHolder(
-        itemView: View,
-        private var vh: org.quick.viewHolder.ViewHolder = org.quick.viewHolder.ViewHolder(
-            itemView
-        )
+        itemView: View, private var vh: VH = VH(itemView)
     ) : RecyclerView.ViewHolder(itemView), VHService {
+
+        init {
+            vh.bindViewHolder(this)
+        }
+
         override fun <T : View> getView(id: Int): T? = vh.getView<T>(id)
 
         override fun setText(
             id: Int,
             content: CharSequence?,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setText(id, content, onClickListener)
+        ): VHService {
+            vh.setText(id, content, onClickListener)
+            return this
+        }
 
         override fun setImg(
             id: Int,
             iconId: Int,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImg(id, iconId, onClickListener)
+        ): VHService {
+            vh.setImg(id, iconId, onClickListener)
+            return this
+        }
 
         override fun setImg(
             id: Int,
             url: CharSequence,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImg(id, url, onClickListener)
+        ): VHService {
+            vh.setImg(id, url, onClickListener)
+            return this
+        }
 
         override fun setImgRoundRect(
             id: Int,
             radius: Float,
             iconId: Int,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImgRoundRect(id, radius, iconId, onClickListener)
+        ): VHService {
+            vh.setImgRoundRect(id, radius, iconId, onClickListener)
+            return this
+        }
 
         override fun setImgRoundRect(
             id: Int,
             radius: Float,
             url: CharSequence,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImgRoundRect(id, radius, url, onClickListener)
+        ): VHService {
+            vh.setImgRoundRect(id, radius, url, onClickListener)
+            return this
+        }
 
         override fun setImgCircle(
             id: Int,
             url: CharSequence,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImgCircle(id, url, onClickListener)
+        ): VHService {
+            vh.setImgCircle(id, url, onClickListener)
+            return this
+        }
 
         override fun setImgCircle(
             id: Int,
             imgRes: Int,
             onClickListener: ((view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit)?
-        ): VHService = vh.setImgCircle(id, imgRes, onClickListener)
+        ): VHService {
+            vh.setImgCircle(id, imgRes, onClickListener)
+            return this
+        }
 
         override fun bindImgCircle(
             context: Context,
             url: String,
             imageView: ImageView?
-        ): ViewHolder = this
+        ): VHService = this
 
-        override fun bindImg(context: Context, url: String, imageView: ImageView?): ViewHolder =
-            this
+        override fun bindImg(context: Context, url: String, imageView: ImageView?): VHService {
+            return this
+        }
 
         override fun bindImgRoundRect(
             context: Context,
             url: String,
             radius: Float,
             imageView: ImageView?
-        ): ViewHolder = this
+        ): VHService = this
 
         override fun setOnClick(
             onClickListener: (view: View, vh: org.quick.viewHolder.ViewHolder) -> Unit,
             vararg ids: Int
-        ): VHService = vh.setOnClick(onClickListener, *ids)
+        ): VHService {
+            vh.setOnClick(onClickListener, *ids)
+            return this
+        }
 
-        override fun setProgress(id: Int, value: Int): VHService = vh.setProgress(id, value)
+        override fun setProgress(id: Int, value: Int): VHService {
+            vh.setProgress(id, value)
+            return this
+        }
 
-        override fun setCheck(id: Int, isChecked: Boolean): VHService = vh.setCheck(id, isChecked)
+        override fun setCheck(id: Int, isChecked: Boolean): VHService {
+            vh.setCheck(id, isChecked)
+            return this
+        }
 
-        override fun setBackgroundResource(id: Int, bgResId: Int): VHService =
+        override fun setBackgroundResource(id: Int, bgResId: Int): VHService {
             vh.setBackgroundResource(id, bgResId)
+            return this
+        }
 
-        override fun setBackground(id: Int, background: Drawable): VHService =
+        override fun setBackground(id: Int, background: Drawable): VHService {
             vh.setBackground(id, background)
+            return this
+        }
 
-        override fun setBackgroundColor(id: Int, background: Int): VHService =
+
+        override fun setBackgroundColor(id: Int, background: Int): VHService {
             vh.setBackgroundColor(id, background)
+            return this
+        }
 
-        override fun setVisibility(visibility: Int, vararg resIds: Int): VHService =
+
+        override fun setVisibility(visibility: Int, vararg resIds: Int): VHService {
             vh.setVisibility(visibility, *resIds)
+            return this
+        }
+
 
         override fun getTextView(id: Int): TextView? = vh.getTextView(id)
 
@@ -564,5 +610,34 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
         override fun getEditText(id: Int): EditText? = vh.getEditText(id)
 
+    }
+
+
+    class VH(itemView: View) : org.quick.viewHolder.ViewHolder(itemView) {
+        private lateinit var viewHolder: VHService
+        fun bindViewHolder(viewHolder: VHService) {
+            this.viewHolder = viewHolder
+        }
+
+        override fun bindImg(context: Context, url: String, imageView: ImageView?): VHService {
+            return viewHolder.bindImg(context, url, imageView)
+        }
+
+        override fun bindImgCircle(
+            context: Context,
+            url: String,
+            imageView: ImageView?
+        ): VHService {
+            return viewHolder.bindImgCircle(context, url, imageView)
+        }
+
+        override fun bindImgRoundRect(
+            context: Context,
+            url: String,
+            radius: Float,
+            imageView: ImageView?
+        ): VHService {
+            return viewHolder.bindImgRoundRect(context, url, radius, imageView)
+        }
     }
 }
