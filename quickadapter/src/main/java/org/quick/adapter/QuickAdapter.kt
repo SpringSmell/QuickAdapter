@@ -273,27 +273,29 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * @param position
      */
     private fun setupLayout(holder: H, position: Int) {
-        if (onResultMargin(position) > 0) {
-            val left = onResultMarginLeft(position).toInt()
-            val top = onResultMarginTop(position).toInt()
-            val right = onResultMarginRight(position).toInt()
-            var bottom = onResultMarginBottom(position).toInt() / 2
 
-            if (position == itemCount - 1)
-                bottom = onResultMarginBottom(position).toInt()
-            val itemLayoutParams = holder.itemView.layoutParams as RecyclerView.LayoutParams
-            itemLayoutParams.setMargins(left, top, right, bottom)
-        }
-        if (onResultPadding(position) > 0) {
-            val left = onResultPaddingLeft(position).toInt()
-            val top = onResultPaddingTop(position).toInt()
-            val right = onResultPaddingRight(position).toInt()
-            var bottom = onResultPaddingBottom(position).toInt() / 2
+        var left = onResultMarginLeft(position).toInt()
+        var top = onResultMarginTop(position).toInt()
+        var right = onResultMarginRight(position).toInt()
+        var bottom =
+            when {
+                position == itemCount - 1 -> onResultMarginBottom(position).toInt()
+                onResultMarginBottom(position) > 0 -> onResultMarginBottom(position).toInt() / 2
+                else -> 0
+            }
+        val itemLayoutParams = holder.itemView.layoutParams as RecyclerView.LayoutParams
+        itemLayoutParams.setMargins(left, top, right, bottom)
 
-            if (position == itemCount - 1)
-                bottom = onResultPaddingBottom(position).toInt()
-            holder.itemView.setPadding(left, top, right, bottom)
-        }
+        left = onResultPaddingLeft(position).toInt()
+        top = onResultPaddingTop(position).toInt()
+        right = onResultPaddingRight(position).toInt()
+        bottom =
+            when {
+                position == itemCount - 1 -> onResultPaddingBottom(position).toInt()
+                onResultPaddingBottom(position) > 0 -> onResultPaddingBottom(position).toInt() / 2
+                else -> 0
+            }
+        holder.itemView.setPadding(left, top, right, bottom)
     }
 
     fun dataList(dataList: MutableList<M>) {
