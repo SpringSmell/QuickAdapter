@@ -310,8 +310,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     fun add(dataList: MutableList<M>) {
         if (dataList.isNotEmpty()) {
-            val lastSize = dataList.size
-            dataList.addAll(dataList)
+            val lastSize = dataList().size
+            dataList().addAll(dataList)
             notifyItemRangeInserted(lastSize + mFooterViews.size() + mHeaderViews.size(), itemCount)
         }
     }
