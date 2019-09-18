@@ -34,15 +34,16 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     val mHeaderViews = SparseArray<View>()/*头部*/
     val mFooterViews = SparseArray<View>()/*底部*/
 
-    var mOnItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? =
+    private var mOnItemClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? =
         null
-    var mOnItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)? =
+    private var mOnItemLongClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Boolean)? =
         null
-    var mOnClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? = null
-    var mOnCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit)? =
+    private var mOnClickListener: ((view: View, viewHolder: H, position: Int, itemData: M) -> Unit)? =
         null
-    var clickResId: IntArray = intArrayOf()
-    var checkedChangedResId = intArrayOf()
+    private var mOnCheckedChangedListener: ((view: View, viewHolder: H, isChecked: Boolean, position: Int, itemData: M) -> Unit)? =
+        null
+    private var clickResId: IntArray = intArrayOf()
+    private var checkedChangedResId = intArrayOf()
 
     /**
      * 布局文件
@@ -299,10 +300,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     fun dataList(dataList: MutableList<M>) {
-        notifyItemRangeRemoved(0, dataList().size)
-        dataList().clear()
-        dataList().addAll(dataList)
-        notifyItemRangeInserted(0, dataList().size)
+        removeAll()
+        add(dataList)
     }
 
     fun dataList(): MutableList<M> {
@@ -311,15 +310,15 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     fun add(dataList: MutableList<M>) {
         if (dataList.isNotEmpty()) {
-            val lastSize = dataList().size
-            dataList().addAll(dataList)
-            notifyItemRangeInserted(lastSize, dataList().size)
+            val lastSize = dataList.size
+            dataList.addAll(dataList)
+            notifyItemRangeInserted(lastSize + mFooterViews.size() + mHeaderViews.size(), itemCount)
         }
     }
 
     fun add(m: M) {
         dataList().add(m)
-        notifyItemInserted(dataList().size)
+        notifyItemInserted(dataList().size + mFooterViews.size() + mHeaderViews.size())
     }
 
     open fun remove(position: Int) {
@@ -384,9 +383,13 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      */
     fun addFooter(@Size(min = 1) vararg views: View) {
         for (view in views) {
-            mFooterViews.put(mFooterViews.size() + Int.MAX_VALUE / 100, view)
+            addFooter(mFooterViews.size() + Int.MAX_VALUE / 100, view)
         }
-        notifyItemRangeInserted(itemCount - views.size, itemCount)
+    }
+
+    fun addFooter(key: Int, view: View) {
+        mFooterViews.put(key, view)
+        notifyItemRangeInserted(itemCount - 1, itemCount)
     }
 
     fun removeHeader(view: View) {
@@ -401,6 +404,14 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         val index = mFooterViews.indexOfValue(view)
         if (index != -1) {
             mFooterViews.remove(mFooterViews.keyAt(index))
+            notifyItemRemoved(index + mHeaderViews.size() + dataList().size)
+        }
+    }
+
+    fun removeFooterView(key: Int) {
+        val index = mFooterViews.indexOfKey(key)
+        if (index != -1) {
+            mFooterViews.remove(key)
             notifyItemRemoved(index + mHeaderViews.size() + dataList().size)
         }
     }
