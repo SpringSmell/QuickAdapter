@@ -21,9 +21,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         rv.layoutManager = LinearLayoutManager(this)
         rv.adapter = adapter
-        for (index in 0 until 10) {
-            adapter.add(BeanKotlin())
-        }
         addHeaderBtn.setOnClickListener {
             val view = LayoutInflater.from(this).inflate(R.layout.item_main_include, null)
             view.layoutParams = RecyclerView.LayoutParams(
@@ -41,11 +38,28 @@ class MainActivity : AppCompatActivity() {
             adapter.addFooter(view)
         }
         addDataBtn.setOnClickListener {
+//            val datas = mutableListOf<BeanKotlin>()
+//            for (index in 0 until 10) {
+//                datas.add(BeanKotlin())
+//            }
+            adapter.add(BeanKotlin())
+        }
+        addAllBtn.setOnClickListener {
             val datas = mutableListOf<BeanKotlin>()
             for (index in 0 until 10) {
                 datas.add(BeanKotlin())
             }
-            adapter.add(datas)
+            adapter.dataList(datas)
+        }
+
+        removeAllBtn.setOnClickListener {
+            adapter.removeAll()
+//            adapter.mFooterViews.clear()
+//            adapter.mHeaderViews.clear()
+//            adapter.notifyItemRangeRemoved(0, adapter.itemCount)
+        }
+        removeAllDataBtn.setOnClickListener {
+            adapter.removeAll()
         }
     }
 
@@ -63,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             holder.setText(R.id.titleTv, "footer：$position") { view, vh ->
                 //                vh.setText(R.id.titleTv, "点击了footer:$position")
                 adapter.removeFooterAt(holder.adapterPosition)
+//                adapter.remove(getItem(position))
             }
         }
 
@@ -75,7 +90,8 @@ class MainActivity : AppCompatActivity() {
             holder.setText(R.id.titleTv, "位置：$position") { view, vh ->
                 //                vh.setText(R.id.titleTv, "点击了$position")
 //                    .setImg(R.id.coverIv,"http://www.baidu.com")
-                adapter.remove(holder.adapterPosition)
+//                adapter.remove(holder.adapterPosition)
+                adapter.remove(getItem(position))
             }.setImg(R.id.coverIv, "http://www.baidu.com")
                 .setImgCircle(R.id.coverIv, "http://www.baidu.com")
                 .setImgRoundRect(R.id.coverIv, 10f, "http://www.baidu.com")

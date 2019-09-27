@@ -164,15 +164,18 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): H {
         context = parent.context
         return when {
-            mHeaderViews.get(viewType) != null -> onResultViewHolder(mHeaderViews.get(viewType))
-            mFooterViews.get(viewType) != null -> onResultViewHolder(mFooterViews.get(viewType))
-            else -> setupLayout(
-                LayoutInflater.from(context).inflate(
-                    onResultLayoutResId(viewType),
-                    parent,
-                    false
+            mHeaderViews.get(viewType) != null ->
+                onResultViewHolder(mHeaderViews.get(viewType))
+            mFooterViews.get(viewType) != null ->
+                onResultViewHolder(mFooterViews.get(viewType))
+            else ->
+                setupLayout(
+                    LayoutInflater.from(context).inflate(
+                        onResultLayoutResId(viewType),
+                        parent,
+                        false
+                    )
                 )
-            )
         }
     }
 
@@ -318,8 +321,11 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     fun dataList(tempList: MutableList<M>) {
+        val lastSize = dataList().size
         dataList().clear()
-        add(tempList)
+        notifyItemRangeRemoved(mHeaderViews.size(), lastSize)
+        dataList().addAll(tempList)
+        notifyItemRangeInserted(lastSize, dataList().size)
     }
 
     fun dataList(): MutableList<M> {
@@ -330,7 +336,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         if (tempList.isNotEmpty()) {
             val lastSize = dataList().size + mHeaderViews.size()
             dataList().addAll(tempList)
-            notifyItemRangeInserted(lastSize,tempList.size)
+            notifyItemRangeInserted(lastSize, tempList.size)
         }
     }
 
@@ -338,6 +344,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         dataList().add(m)
         val topSize = mHeaderViews.size() + dataList().size
         notifyItemInserted(topSize)
+        notifyItemRangeChanged(topSize, itemCount - topSize - mFooterViews.size())
     }
 
     /**
@@ -348,15 +355,19 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
             val index = getRealDataPosition(position)
             dataList.removeAt(index)
             notifyItemRemoved(position)
+            notifyItemRangeChanged(position, itemCount - position)
         } catch (O_O: IndexOutOfBoundsException) {
             O_O.printStackTrace()
         }
     }
 
     fun remove(m: M) {
+        val index = dataList().indexOf(m)
+        val topIndex = mHeaderViews.size() + index
+        val itemCount = dataList().size - index - 1
         dataList().remove(m)
-        val topIndex = mHeaderViews.size()
-        notifyItemRemoved(dataList().indexOf(m) + topIndex)
+        notifyItemRemoved(topIndex)
+        notifyItemRangeChanged(topIndex, itemCount)
     }
 
     fun removeAll() {
@@ -370,6 +381,13 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     /*head footer相关*/
+
+    fun getVisibilityCount(): Int {
+        return if (parent != null) {
+            parent!!.layoutManager!!.childCount
+        } else
+            0
+    }
 
     /**
      * 添加头部View
@@ -404,7 +422,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     fun addFooter(key: Int, view: View) {
         mFooterViews.put(key, view)
         val index = mHeaderViews.size() + dataList().size + mFooterViews.indexOfKey(key) + 1
-        notifyItemInserted(index)
+        notifyItemInserted(0)
     }
 
     fun removeHeader(view: View) {
@@ -432,6 +450,10 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         try {
             mHeaderViews.removeAt(position)
             notifyItemRemoved(position)
+            /*
+            *header未添加在parent中，无法刷新
+            notifyItemRangeChanged(position, getVisibilityCount())
+            * */
         } catch (O_O: IndexOutOfBoundsException) {
             O_O.printStackTrace()
         }
@@ -461,6 +483,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
             val topIndex = mHeaderViews.size() + dataList().size
             mFooterViews.removeAt(position - topIndex)
             notifyItemRemoved(position)
+
         } catch (O_O: IndexOutOfBoundsException) {
             O_O.printStackTrace()
         }
@@ -499,9 +522,12 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     fun getRealDataPosition(position: Int): Int {
         var realIndex = position - mHeaderViews.size()
         realIndex = when {
-            realIndex < 0 -> 0
-            realIndex >= dataList().size -> dataList().size - 1
-            else -> realIndex
+            realIndex < 0 ->
+                0
+            realIndex >= dataList().size ->
+                dataList().size - 1
+            else ->
+                realIndex
         }
         return realIndex
     }
