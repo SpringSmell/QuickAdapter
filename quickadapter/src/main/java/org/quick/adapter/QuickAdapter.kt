@@ -58,9 +58,14 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     @CallSuper
     override fun getItemViewType(position: Int): Int = when {
-        isHeaderView(position) -> mHeaderViews.keyAt(position)
-        isFooterView(position) -> mFooterViews.keyAt(position - dataList.size - mHeaderViews.size())
-        else -> getOriginalPosition(position)
+        isHeaderView(position) ->
+            mHeaderViews.keyAt(position)
+        isFooterView(position) -> {
+            val topSize = mHeaderViews.size() + dataList().size
+            mFooterViews.keyAt(position - topSize)
+        }
+        else ->
+            getRealDataPosition(position)
     }
 
     /**
@@ -159,8 +164,8 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): H {
         context = parent.context
         return when {
-            mHeaderViews.get(viewType) != null -> ViewHolder(mHeaderViews.get(viewType)) as H
-            mFooterViews.get(viewType) != null -> ViewHolder(mFooterViews.get(viewType)) as H
+            mHeaderViews.get(viewType) != null -> onResultViewHolder(mHeaderViews.get(viewType))
+            mFooterViews.get(viewType) != null -> onResultViewHolder(mFooterViews.get(viewType))
             else -> setupLayout(
                 LayoutInflater.from(context).inflate(
                     onResultLayoutResId(viewType),
@@ -194,21 +199,34 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     open fun onResultViewHolder(itemView: View): H = ViewHolder(itemView) as H
 
+    open fun onBindViewHolderHeader(holder: H, position: Int) = Unit
+
+    open fun onBindViewHolderFooter(holder: H, position: Int) = Unit
+
     override fun onBindViewHolder(holder: H, position: Int, payloads: MutableList<Any>) {
         super.onBindViewHolder(holder, position, payloads)
     }
 
     override fun onBindViewHolder(holder: H, position: Int) {
-        if (!(isHeaderView(position) || isFooterView(position))) {
-            val realPosition = getOriginalPosition(position)
-            setupListener(holder)
-            setupLayout(holder, realPosition)
-            onBindData(
-                holder,
-                realPosition,
-                dataList()[realPosition],
-                getItemViewType(realPosition)
-            )
+        when {
+            isHeaderView(position) -> {
+                onBindViewHolderHeader(holder, position)
+            }
+            isFooterView(position) -> {
+                val topSize = mHeaderViews.size() + dataList().size
+                onBindViewHolderFooter(holder, position - topSize)
+            }
+            else -> {
+                val realPosition = getRealDataPosition(position)
+                setupListener(holder)
+                setupLayout(holder, realPosition)
+                onBindData(
+                    holder,
+                    realPosition,
+                    dataList()[realPosition],
+                    getItemViewType(realPosition)
+                )
+            }
         }
     }
 
@@ -222,14 +240,14 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(object : OnClickListener2() {
                 override fun click(view: View) {
-                    val dataIndex = getOriginalPosition(holder.adapterPosition)
+                    val dataIndex = getRealDataPosition(holder.adapterPosition)
                     mOnItemClickListener?.invoke(view, holder, dataIndex, getItem(dataIndex))
                 }
             })
         }
         /*长按事件*/
         if (mOnItemLongClickListener != null) holder.itemView.setOnLongClickListener { v ->
-            val dataIndex = getOriginalPosition(holder.adapterPosition)
+            val dataIndex = getRealDataPosition(holder.adapterPosition)
             mOnItemLongClickListener!!.invoke(v, holder, dataIndex, getItem(dataIndex))
         }
         /*选择事件*/
@@ -238,7 +256,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
                 val compoundButton = holder.getView<View>(resId)
                 if (compoundButton is CompoundButton)
                     compoundButton.setOnCheckedChangeListener { buttonView, isChecked ->
-                        val dataIndex = getOriginalPosition(holder.adapterPosition)
+                        val dataIndex = getRealDataPosition(holder.adapterPosition)
                         mOnCheckedChangedListener?.invoke(
                             buttonView,
                             holder,
@@ -261,7 +279,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         /*item项内View的独立点击事件，与OnItemClickListner不冲突*/
         if (mOnClickListener != null && clickResId.isNotEmpty()) {
             holder.setOnClick({ view, vh ->
-                val dataIndex = getOriginalPosition(holder.adapterPosition)
+                val dataIndex = getRealDataPosition(holder.adapterPosition)
                 mOnClickListener?.invoke(view, holder, dataIndex, getItem(dataIndex))
             }, *clickResId)
         }
@@ -299,19 +317,19 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         holder.itemView.setPadding(left, top, right, bottom)
     }
 
-    fun dataList(dataList: MutableList<M>) {
+    fun dataList(tempList: MutableList<M>) {
         removeAll()
-        add(dataList)
+        add(tempList)
     }
 
     fun dataList(): MutableList<M> {
         return dataList
     }
 
-    fun add(dataList: MutableList<M>) {
-        if (dataList.isNotEmpty()) {
+    fun add(tempList: MutableList<M>) {
+        if (tempList.isNotEmpty()) {
             val lastSize = dataList().size
-            dataList().addAll(dataList)
+            dataList().addAll(tempList)
             notifyItemRangeInserted(lastSize + mFooterViews.size() + mHeaderViews.size(), itemCount)
         }
     }
@@ -321,14 +339,23 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         notifyItemInserted(dataList().size + mFooterViews.size() + mHeaderViews.size())
     }
 
-    open fun remove(position: Int) {
-        dataList().removeAt(position)
-        notifyItemRemoved(position + mHeaderViews.size())
+    /**
+     * @param position 真实位置，调用holder.adapterPosition
+     */
+    fun remove(position: Int) {
+        try {
+            val index = getRealDataPosition(position)
+            dataList.removeAt(index)
+            notifyItemRemoved(position)
+        } catch (O_O: IndexOutOfBoundsException) {
+            O_O.printStackTrace()
+        }
     }
 
-    open fun remove(m: M) {
+    fun remove(m: M) {
         dataList().remove(m)
-        notifyItemRemoved(dataList().indexOf(m) + mHeaderViews.size())
+        val topIndex = mHeaderViews.size()
+        notifyItemRemoved(dataList().indexOf(m) + topIndex)
     }
 
     fun removeAll() {
@@ -338,6 +365,93 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     fun getItem(position: Int): M {
         return dataList()[position]
+    }
+
+    /*head footer相关*/
+
+    /**
+     * 添加头部View
+     */
+    fun addHeader(view: View) {
+        addHeader(mHeaderViews.size() + Int.MAX_VALUE / 100, view)
+    }
+
+    fun addHeader(key: Int, view: View) {
+        mHeaderViews.put(key, view)
+        val index = mHeaderViews.indexOfKey(key)
+        notifyItemInserted(index)
+    }
+
+    /**
+     * 添加底部View
+     */
+    fun addFooter(view: View) {
+        addFooter(mFooterViews.size() + Int.MAX_VALUE / 100, view)
+    }
+
+    fun addFooter(key: Int, view: View) {
+        mFooterViews.put(key, view)
+        val index = mHeaderViews.size() + dataList().size + mFooterViews.indexOfKey(key)
+        notifyItemInserted(index)
+    }
+
+    fun removeHeader(view: View) {
+        val index = mHeaderViews.indexOfValue(view)
+        if (index != -1) {
+            mHeaderViews.remove(mHeaderViews.keyAt(index))
+            notifyItemRemoved(index)
+        } else {
+            Log.e(javaClass::class.java.simpleName, "指定View不存在，删除失败")
+        }
+    }
+
+    /**
+     * 以Key的方式删除
+     */
+    fun removeHeader(key: Int) {
+        mHeaderViews.remove(key)
+        notifyItemRemoved(mHeaderViews.indexOfKey(key))
+    }
+
+    /**
+     * @param position 真实位置，调用holder.adapterPosition
+     */
+    fun removeHeaderAt(position: Int) {
+        try {
+            mHeaderViews.removeAt(position)
+            notifyItemRemoved(position)
+        } catch (O_O: IndexOutOfBoundsException) {
+            O_O.printStackTrace()
+        }
+    }
+
+    fun removeFooter(view: View) {
+        val index = mFooterViews.indexOfValue(view)
+        if (index != -1) {
+            removeFooterAt(index)
+        } else {
+            Log.e(javaClass::class.java.simpleName, "指定View不存在，删除失败")
+        }
+    }
+
+    fun removeFooter(key: Int) {
+        mFooterViews.remove(key)
+        val topIndex = mHeaderViews.size() + dataList().size
+        val index = mFooterViews.indexOfKey(key)
+        notifyItemRemoved(topIndex + index)
+    }
+
+    /**
+     * @param position 真实位置，调用holder.adapterPosition
+     */
+    fun removeFooterAt(position: Int) {
+        try {
+            val topIndex = mHeaderViews.size() + dataList().size
+            mFooterViews.removeAt(position - topIndex)
+            notifyItemRemoved(position)
+        } catch (O_O: IndexOutOfBoundsException) {
+            O_O.printStackTrace()
+        }
     }
 
     fun onClick(
@@ -366,85 +480,49 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
         this.mOnItemLongClickListener = onItemLongClickListener
     }
 
-    /*head footer相关*/
 
     /**
-     * 添加头部View
+     * 获取实际数据位置
      */
-    fun addHeader(@Size(min = 1) vararg views: View) {
-        for (view in views) {
-            mHeaderViews.put(mHeaderViews.size() + Int.MAX_VALUE / 100, view)
+    fun getRealDataPosition(position: Int): Int {
+        var realIndex = position - mHeaderViews.size()
+        realIndex = when {
+            realIndex < 0 -> 0
+            realIndex >= dataList().size -> dataList().size - 1
+            else -> realIndex
         }
-        notifyItemRangeInserted(mHeaderViews.size() - views.size, mHeaderViews.size())
+        return realIndex
     }
 
-    /**
-     * 添加底部View
-     */
-    fun addFooter(@Size(min = 1) vararg views: View) {
-        for (view in views) {
-            addFooter(mFooterViews.size() + Int.MAX_VALUE / 100, view)
-        }
-    }
-
-    fun addFooter(key: Int, view: View) {
-        mFooterViews.put(key, view)
-        notifyItemRangeInserted(itemCount - 1, itemCount)
-    }
-
-    fun removeHeader(view: View) {
-        val index = mHeaderViews.indexOfValue(view)
-        if (index != -1) {
-            mHeaderViews.remove(mHeaderViews.keyAt(index))
-            notifyItemRemoved(index)
-        }
-    }
-
-    fun removeFooter(view: View) {
-        val index = mFooterViews.indexOfValue(view)
-        if (index != -1) {
-            mFooterViews.remove(mFooterViews.keyAt(index))
-            notifyItemRemoved(index + mHeaderViews.size() + dataList().size)
-        }
-    }
-
-    fun removeFooterView(key: Int) {
-        val index = mFooterViews.indexOfKey(key)
-        if (index != -1) {
-            mFooterViews.remove(key)
-            notifyItemRemoved(index + mHeaderViews.size() + dataList().size)
-        }
-    }
-
-    /**
-     * 获取实际坐标
-     */
-    fun getOriginalPosition(position: Int): Int = position - mHeaderViews.size()
+    fun isHeaderView(view: View) =
+        mHeaderViews.size() > 0 && mHeaderViews.indexOfValue(view) != -1
 
     /**
      * 根据flag判断是否是头部
-     * * @param flag 下标位置或者是Key
+     * * @param position 下标位置或者是Key
      */
-    fun isHeaderView(flag: Int): Boolean =
-        itemCount > dataList.size && flag - mHeaderViews.size() < 0 || mHeaderViews.get(flag) != null
+    fun isHeaderView(position: Int): Boolean =
+        mHeaderViews.size() > 0 &&
+                position < mHeaderViews.size() &&
+                mHeaderViews.valueAt(position) != null
 
     /**
      * 根据flag判断是否是尾总
-     * @param flag 下标位置或者是Key
+     * @param position 下标位置或者是Key
      */
-    fun isFooterView(flag: Int): Boolean =
-        itemCount > dataList.size && flag - mHeaderViews.size() >= dataList.size || mFooterViews.get(
-            flag
-        ) != null
+    fun isFooterView(position: Int): Boolean {
+        val maxIndex = mHeaderViews.size() + dataList().size - 1
+        return mFooterViews.size() > 0 && position > maxIndex
+    }
 
-    fun isHeaderView(view: View) = mHeaderViews.size() > 0 && mHeaderViews.indexOfValue(view) != -1
-
-    fun isFooterView(view: View) = mFooterViews.size() > 0 && mFooterViews.indexOfValue(view) != -1
+    fun isFooterView(view: View) =
+        mFooterViews.size() > 0 && mFooterViews.indexOfValue(view) != -1
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         parent = recyclerView
         when {
+            /*占一整行*/
             parent!!.layoutManager is GridLayoutManager -> (parent!!.layoutManager as GridLayoutManager).spanSizeLookup =
                 object : GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
