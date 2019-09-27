@@ -27,7 +27,12 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:text="添加header" />
-
+        <Button
+                android:id="@+id/addDataBtn"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="添加Data" />
         <Button
                 android:id="@+id/addFooterBtn"
                 android:layout_width="0dp"

@@ -318,7 +318,7 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     fun dataList(tempList: MutableList<M>) {
-        removeAll()
+        dataList().clear()
         add(tempList)
     }
 
@@ -328,15 +328,16 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
 
     fun add(tempList: MutableList<M>) {
         if (tempList.isNotEmpty()) {
-            val lastSize = dataList().size
+            val lastSize = dataList().size + mHeaderViews.size()
             dataList().addAll(tempList)
-            notifyItemRangeInserted(lastSize + mFooterViews.size() + mHeaderViews.size(), itemCount)
+            notifyItemRangeInserted(lastSize,tempList.size)
         }
     }
 
     fun add(m: M) {
         dataList().add(m)
-        notifyItemInserted(dataList().size + mFooterViews.size() + mHeaderViews.size())
+        val topSize = mHeaderViews.size() + dataList().size
+        notifyItemInserted(topSize)
     }
 
     /**
@@ -359,8 +360,9 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
     }
 
     fun removeAll() {
-        notifyItemRangeRemoved(mHeaderViews.size(), dataList().size)
+        val lastDataSize = dataList().size
         dataList().clear()
+        notifyItemRangeRemoved(mHeaderViews.size(), lastDataSize)
     }
 
     fun getItem(position: Int): M {
@@ -373,7 +375,12 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * 添加头部View
      */
     fun addHeader(view: View) {
-        addHeader(mHeaderViews.size() + Int.MAX_VALUE / 100, view)
+        val key =
+            if (mHeaderViews.size() > 0)
+                mHeaderViews.keyAt(mHeaderViews.size() - 1) + 1
+            else
+                Int.MAX_VALUE / 100
+        addHeader(key, view)
     }
 
     fun addHeader(key: Int, view: View) {
@@ -386,12 +393,17 @@ abstract class QuickAdapter<M, H : QuickAdapter.ViewHolder> : RecyclerView.Adapt
      * 添加底部View
      */
     fun addFooter(view: View) {
-        addFooter(mFooterViews.size() + Int.MAX_VALUE / 100, view)
+        val key =
+            if (mFooterViews.size() > 0)
+                mFooterViews.keyAt(mFooterViews.size() - 1) + 1
+            else
+                Int.MAX_VALUE / 100
+        addFooter(key, view)
     }
 
     fun addFooter(key: Int, view: View) {
         mFooterViews.put(key, view)
-        val index = mHeaderViews.size() + dataList().size + mFooterViews.indexOfKey(key)
+        val index = mHeaderViews.size() + dataList().size + mFooterViews.indexOfKey(key) + 1
         notifyItemInserted(index)
     }
 

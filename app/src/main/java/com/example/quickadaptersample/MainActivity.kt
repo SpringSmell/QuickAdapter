@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         rv.layoutManager = LinearLayoutManager(this)
         rv.adapter = adapter
-        for (index in 0..11) {
+        for (index in 0 until 10) {
             adapter.add(BeanKotlin())
         }
         addHeaderBtn.setOnClickListener {
@@ -39,6 +39,13 @@ class MainActivity : AppCompatActivity() {
                 RecyclerView.LayoutParams.WRAP_CONTENT
             )
             adapter.addFooter(view)
+        }
+        addDataBtn.setOnClickListener {
+            val datas = mutableListOf<BeanKotlin>()
+            for (index in 0 until 10) {
+                datas.add(BeanKotlin())
+            }
+            adapter.add(datas)
         }
     }
 
@@ -66,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             viewType: Int
         ) {
             holder.setText(R.id.titleTv, "位置：$position") { view, vh ->
-//                vh.setText(R.id.titleTv, "点击了$position")
+                //                vh.setText(R.id.titleTv, "点击了$position")
 //                    .setImg(R.id.coverIv,"http://www.baidu.com")
                 adapter.remove(holder.adapterPosition)
             }.setImg(R.id.coverIv, "http://www.baidu.com")
